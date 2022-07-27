@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from sqlite3 import connect
 import pika
 import json
 import psutil
@@ -7,48 +8,56 @@ import time
 #standard rabbitmq client pika is used to open a blocking connnection
 
 connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+#connection = pika.SelectConnection(pika.ConnectionParameters('localhost'))
 channel = connection.channel()
 
-cpu_count = psutil.cpu_count()
+print("Specify the interval of sending information (in seconds)")
+duration = int(input())
 
-duration = 6 #cpu usage is calculated over a period of time
-cpu_usage = psutil.cpu_percent(duration)
 
-cpu_freq = psutil.cpu_freq()
+while(True):
+    #psutil lib is used to get cpu status
+    cpu_count = psutil.cpu_count()
 
-cpu_stats = psutil.cpu_stats()
+    #cpu usage is calculated over a period of time
+    
 
-memory = psutil.virtual_memory()
+    cpu_usage = psutil.cpu_percent(duration)
 
-disk_partitions = psutil.disk_partitions()
+    cpu_freq = psutil.cpu_freq()
 
-cpu_data = {
-            "cpu_count": cpu_count,
-            "cpu_usage": cpu_usage,
-            "cpu_freq": cpu_freq.current,
-            "cpu_stats": {
-                "ctx_switches": cpu_stats.ctx_switches,
-                "interrupts": cpu_stats.interrupts,
-                "soft_interrupts": cpu_stats.soft_interrupts,
-                "syscalls": cpu_stats.syscalls
-            },
-            "memory": {
-                "total": memory.total,
-                "available": memory.available,
-                "free": memory.free,
-                "used": memory.used
+    cpu_stats = psutil.cpu_stats()
 
-            },
-            "disk_partitions": disk_partitions
-}
+    memory = psutil.virtual_memory()
 
-message= json.dumps(cpu_data)
+    disk_partitions = psutil.disk_partitions()
 
-channel.basic_publish(
-                        exchange='',
-                        routing_key='cpu_info',
-                        body=message
-                    )
-print("Data Sent to Queue")
+    cpu_data = {
+                "cpu_count": cpu_count,
+                "cpu_usage": cpu_usage,
+                "cpu_freq": cpu_freq.current,
+                "cpu_stats": {
+                    "ctx_switches": cpu_stats.ctx_switches,
+                    "interrupts": cpu_stats.interrupts,
+                    "soft_interrupts": cpu_stats.soft_interrupts,
+                    "syscalls": cpu_stats.syscalls
+                },
+                "memory": {
+                    "total": memory.total,
+                    "available": memory.available,
+                    "free": memory.free,
+                    "used": memory.used
 
-connection.close()
+                },
+                "disk_partitions": disk_partitions
+    }
+
+    message= json.dumps(cpu_data)
+
+    channel.basic_publish(
+                            exchange='',
+                            routing_key='cpu_info',
+                            body=message
+                        )
+    print("Data Sent to Queue")
+
