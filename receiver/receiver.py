@@ -1,10 +1,13 @@
 #!/usr/bin/env python
-import pika, sys, os
+import pika
+import sys
+import os
 import logging
 import json
 import pprint
 def main():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+    # connection = pika.adapters.SelectConnection(pika.ConnectionParameters('localhost'))
     channel = connection.channel()
     
     channel.queue_declare(queue='cpu_info')
