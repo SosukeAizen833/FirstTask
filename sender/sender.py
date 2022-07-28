@@ -53,21 +53,21 @@ def main():
                     "disk_partitions": disk_partitions
         }
 
-        message= json.dumps(cpu_data)
+        message = json.dumps(cpu_data)
 
         channel.basic_publish(
                                 exchange='',
                                 routing_key='cpu_info',
                                 body=message
                             )
-                                                
+
         print("Data Sent to Queue")
 
 if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        print('Interrupted')
+        print('Interrupted by User')
         try:
             sys.exit(0)
         except SystemExit:
