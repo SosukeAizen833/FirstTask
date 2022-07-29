@@ -1,4 +1,4 @@
-# FirstTask
+# Rabbit MQ Client Server communication
 Client and Server communication using python
 Implement two applications to communicate via RMQ
 
